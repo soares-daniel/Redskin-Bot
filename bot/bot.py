@@ -38,7 +38,3 @@ class PRDBot(commands.Bot):
         print("Les Peaux Rouges - Discord Bot")
         print(self.user.name)
         print("------")
-
-        # Get channel with id 1121177566775095478
-        channel = self.get_channel(1121177566775095478)
-        await channel.send("I fucked your wife")
