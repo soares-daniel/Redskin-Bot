@@ -4,6 +4,11 @@ SETTINGS_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SETTINGS_DIR)
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
 
+SERVER_PORT = os.getenv('SERVER_PORT')
+NOTIFICATION_ENDPOINT = os.getenv('NOTIFICATION_ENDPOINT')
+GUILD_ID = os.getenv('GUILD_ID')
+NOTIFICATION_CHANNEL_ID = os.getenv('NOTIFICATION_CHANNEL_ID')
+
 # Discord
 DISCORD_BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET')
@@ -12,5 +17,6 @@ DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID')
 # PRD API
 USERNAME = os.getenv('USERNAME')
 PASSWORD = os.getenv('PASSWORD')
-API_UR = os.getenv('API_URL')
+API_URL = os.getenv('API_URL')
+API_SERVER_PORT = os.getenv('API_SERVER_PORT')
 EVENT_ENDPOINT = os.getenv('EVENT_ENDPOINT')
