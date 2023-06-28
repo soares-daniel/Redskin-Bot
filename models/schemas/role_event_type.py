@@ -23,5 +23,3 @@ class RoleEventTypeInResponse(BaseSchemaModel):
     can_edit: bool
     can_see: bool
     can_add: bool
-    created_at: datetime.datetime
-    updated_at: datetime.datetime | None

@@ -1,12 +1,14 @@
 import logging
 
+import discord
 from discord.ext import commands
 
+from bot.bot import PRDBot
 from bot.embeds.database import UserEmbed, RoleEmbed, EventTypeEmbed, RoleEventTypeEmbed
 
 
 class Database(commands.Cog):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: PRDBot) -> None:
         self.bot = bot
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
@@ -14,23 +16,23 @@ class Database(commands.Cog):
         self.logger.addHandler(self.bot.stream_handler)
 
     @commands.slash_command(name="database", description="Get tables from the database")
-    async def database_info(self, ctx):
+    async def database_info(self, ctx: discord.ApplicationContext):
         """Get tables from the database"""
-        await ctx.defer()
+        await ctx.respond("Getting database info...")
 
-        user_embed = UserEmbed()
+        user_embed = UserEmbed(self.bot)
         await user_embed.load_users()
         await ctx.send(embed=user_embed)
 
-        role_embed = RoleEmbed()
+        role_embed = RoleEmbed(self.bot)
         await role_embed.load_roles()
         await ctx.send(embed=role_embed)
 
-        event_type_embed = EventTypeEmbed()
+        event_type_embed = EventTypeEmbed(self.bot)
         await event_type_embed.load_event_types()
         await ctx.send(embed=event_type_embed)
 
-        role_event_type_embed = RoleEventTypeEmbed()
+        role_event_type_embed = RoleEventTypeEmbed(self.bot)
         await role_event_type_embed.load_role_event_types()
         await ctx.send(embed=role_event_type_embed)
 
