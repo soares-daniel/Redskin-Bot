@@ -43,6 +43,26 @@ class Test(commands.Cog):
         deleted_event = await self.bot.http_client.delete(url=url)
         await ctx.send(f"Deleted event:\n{deleted_event}")
 
+    @commands.slash_command(name="test_user", description="Creates and deletes a user for testing purposes")
+    async def test_user(self, ctx: discord.ApplicationContext):
+        await ctx.respond("Creating user...")
+
+        url = f"{API_URL}/users/create"
+        user = {
+            "username": "test_user",
+            "password": "test_password"
+            }
+
+        new_user = await self.bot.http_client.post(url=url, data=user)
+        await ctx.send(f"Created user:\n{new_user}")
+
+        await ctx.send("Deleting user...")
+
+        user_id = new_user.get('id')  # type: ignore
+        url = f"{API_URL}/users/delete/{user_id}"
+        deleted_user = await self.bot.http_client.delete(url=url)
+        await ctx.send(f"Deleted user:\n{deleted_user}")
+
 
 def setup(bot) -> None:
     bot.add_cog(Test(bot))
