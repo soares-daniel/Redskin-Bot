@@ -3,8 +3,10 @@ import logging
 import discord
 from discord.ext import commands
 
+from models.schemas.event import EventInCreate
 from bot.bot import PRDBot
 from bot.embeds.database import UserEmbed, RoleEmbed, EventTypeEmbed, RoleEventTypeEmbed
+from settings import API_URL
 
 
 class Database(commands.Cog):
