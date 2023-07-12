@@ -1,3 +1,5 @@
+from typing import List
+
 from bot.requests.http_client import HttpClient
 from models.schemas.event_type import EventTypeInResponse
 from settings import API_URL
@@ -8,7 +10,7 @@ EVENT_URL = f"{API_URL}/events"
 
 async def get_events(
         http_client: HttpClient
-) -> list[EventInResponse]:
+) -> List[EventInResponse]:
     """Get all events"""
     db_events = await http_client.get(EVENT_URL)
     db_event_list = list()
@@ -26,7 +28,7 @@ async def get_events(
 
 async def get_event_types(
         http_client: HttpClient
-) -> list[EventTypeInResponse]:
+) -> List[EventTypeInResponse]:
     """Get all event types"""
     db_event_types = await http_client.get(f"{EVENT_URL}/event_types")
     db_event_type_list = list()

@@ -1,3 +1,5 @@
+from typing import List
+
 from bot.requests.http_client import HttpClient
 from settings import API_URL
 from models.schemas.role import RoleInResponse
@@ -8,7 +10,7 @@ ROLE_URL = f"{API_URL}/roles"
 
 async def get_roles(
         http_client: HttpClient
-) -> list[RoleInResponse]:
+) -> List[RoleInResponse]:
     """Get all roles"""
     db_roles = await http_client.get(ROLE_URL)
     db_role_list = list()
@@ -24,7 +26,7 @@ async def get_roles(
 
 async def get_role_event_types(
         http_client: HttpClient
-) -> list[RoleEventTypeInResponse]:
+) -> List[RoleEventTypeInResponse]:
     """Get all role event types"""
     db_role_event_types = await http_client.get(f"{ROLE_URL}/permissions")
     db_role_event_type_list = list()

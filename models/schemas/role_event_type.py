@@ -1,5 +1,3 @@
-import datetime
-
 from models.schemas.base import BaseSchemaModel
 
 

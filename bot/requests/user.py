@@ -1,3 +1,5 @@
+from typing import List
+
 from bot.requests.http_client import HttpClient
 from models.schemas.role import RoleInResponse
 from settings import API_URL
@@ -8,7 +10,7 @@ USER_URL = f"{API_URL}/users"
 
 async def get_users(
         http_client: HttpClient
-) -> list[UserInResponse]:
+) -> List[UserInResponse]:
     """Get all users"""
     db_users = await http_client.get(USER_URL)
     db_user_list = list()
@@ -32,7 +34,7 @@ async def get_users(
 async def get_user_roles(
         http_client: HttpClient,
         user_id: int
-) -> list[RoleInResponse]:
+) -> List[RoleInResponse]:
     """Get all roles from user"""
     db_roles = await http_client.get(f"{USER_URL}/user/{user_id}/roles")
     db_role_list = list()

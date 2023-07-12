@@ -48,7 +48,8 @@ class HttpClient:
                 "Authorization": f"Bearer {token}"
             }
             async with session.post(url, json=data, headers=headers) as response:
-                return await response.json()
+                final = await response.json()
+                return final
 
     @handle_http_errors
     async def put(

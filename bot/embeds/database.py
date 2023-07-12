@@ -1,7 +1,7 @@
 import discord
 
 from bot.bot import PRDBot
-from bot.requests.user import get_users, get_user_roles
+from bot.requests.user import get_users
 from bot.requests.role import get_roles, get_role_event_types
 from bot.requests.event import get_event_types
 
