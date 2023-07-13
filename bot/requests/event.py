@@ -17,9 +17,14 @@ async def get_events(
     for db_event in db_events:  # type: ignore
         event = EventInResponse(
             id=db_event.get("id"),
-            event=db_event.get("event"),
-            created_at=db_event.get("created_at"),
-            updated_at=db_event.get("updated_at"),
+            created_by=db_event.get("createdBy"),
+            event_type=db_event.get("eventType"),
+            title=db_event.get("title"),
+            description=db_event.get("description"),
+            start_date=db_event.get("startDate"),
+            end_date=db_event.get("endDate"),
+            created_at=db_event.get("createdAt"),
+            updated_at=db_event.get("updatedAt"),
         )
         db_event_list.append(event)
 
