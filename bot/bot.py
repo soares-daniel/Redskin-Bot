@@ -195,9 +195,14 @@ class PRDBot(commands.Bot):
 
     async def create_calendar(self):
         events = await get_events(self.http_client)
-        embed = CalendarEmbed(events=events).build()
+        embed = await CalendarEmbed(events=events).build()
         channel = await self.fetch_channel(self.CALENDAR_CHANNEL_ID)
         if channel is None:
             return
 
-        await channel.send(embed=embed)  # type: ignore
+        # Get the last message
+        last_message = await channel.history(limit=1).flatten()
+        if last_message:
+            await last_message[0].edit(embed=embed)
+        else:
+            await channel.send(embed=embed)  # type: ignore
