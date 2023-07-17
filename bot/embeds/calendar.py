@@ -19,6 +19,10 @@ async def get_days_from_events(events: List[EventInResponse]) -> List[str]:
 
     # Remove duplicates
     days = list(dict.fromkeys(days))
+
+    # Sort
+    days.sort(key=lambda x: datetime.datetime.strptime(x, "%A - %d.%m.%Y"))
+
     return days
 
 
