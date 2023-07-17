@@ -57,7 +57,12 @@ class PRDBot(commands.Bot):
 
         # Backend
         self.auth_user = None
-        self.http_client: HttpClient = HttpClient(self.get_token, self.set_auth_user)
+        self.http_client: HttpClient = HttpClient(
+            get_token=self.get_token,
+            set_auth_user=self.set_auth_user,
+            file_handler=self.file_handler,
+            stream_handler=self.stream_handler
+        )
 
         self.MAIN_GUILD = None
         self.CATEGORY = None
@@ -77,7 +82,7 @@ class PRDBot(commands.Bot):
         await self.init_channels()
         self.logger.info("------")
         try:
-            await login(self.get_http_client, self.set_auth_user)
+            await login(self.get_http_client, self.set_auth_user, self.logger)
         except ConnectionRefusedError as e:
             self.logger.exception(e)
             await self.close()
@@ -140,7 +145,6 @@ class PRDBot(commands.Bot):
         self.COMMAND_CHANNEL_ID = command_channel.id
         self.EVENT_CHANNEL_ID = event_channel.id
 
-        print("CHANNELS INITIALIZED")
         logging.info("Channels initialized")
 
     async def start_server(self):
@@ -205,7 +209,7 @@ class PRDBot(commands.Bot):
             if operation_type == "event":
                 await self.create_calendar()
 
-            self.logger.debug("Received event: %s", response)
+            self.logger.debug(f"Received event: {response}")
         else:
             self.logger.error(f"Unsupported operation type: {operation_type}")
             return web.Response()

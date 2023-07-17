@@ -1,3 +1,4 @@
+import logging
 import typing
 
 import aiohttp
@@ -11,8 +12,8 @@ def handle_http_errors(func):
             return await func(self, *args, **kwargs)
         except aiohttp.ClientResponseError as e:
             if e.status == 401:
-                # Handle unauthorized error
-                print("Unauthorized error, logging in...")
+                # Logging
+                self.logger.error(f"Unauthorized error, logging in...")
                 await login(self, self.set_auth_user)
                 return await func(self, *args, **kwargs)
             else:
@@ -21,9 +22,19 @@ def handle_http_errors(func):
 
 
 class HttpClient:
-    def __init__(self, get_token, set_auth_user) -> None:
+    def __init__(
+            self,
+            get_token,
+            set_auth_user,
+            file_handler: logging.FileHandler,
+            stream_handler: logging.StreamHandler
+    ) -> None:
         self.get_token = get_token
         self.set_auth_user = set_auth_user
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.addHandler(file_handler)
+        self.logger.addHandler(stream_handler)
 
     @handle_http_errors
     async def get(
@@ -34,7 +45,7 @@ class HttpClient:
             headers = {
                 "Authorization": f"Bearer {token}"
             }
-# Define your headers
+            self.logger.debug(f"GET request to {url} with headers {headers}")
             async with session.get(url, headers=headers) as response:
                 return await response.json()
 
@@ -47,6 +58,7 @@ class HttpClient:
             headers = {
                 "Authorization": f"Bearer {token}"
             }
+            self.logger.debug(f"POST request to {url} with headers {headers} and data {data}")
             async with session.post(url, json=data, headers=headers) as response:
                 final = await response.json()
                 return final
@@ -60,6 +72,7 @@ class HttpClient:
             headers = {
                 "Authorization": f"Bearer {token}"
             }
+            self.logger.debug(f"PUT request to {url} with headers {headers} and data {data}")
             async with session.put(url, json=data, headers=headers) as response:
                 return await response.json()
 
@@ -72,5 +85,6 @@ class HttpClient:
             headers = {
                 "Authorization": f"Bearer {token}"
             }
+            self.logger.debug(f"DELETE request to {url} with headers {headers}")
             async with session.delete(url, headers=headers) as response:
                 return await response.json()

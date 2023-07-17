@@ -6,12 +6,7 @@ from models.schemas.role import RoleInResponse
 from models.schemas.role_event_type import RoleEventTypeInResponse
 from models.schemas.user import UserInResponse
 from models.schemas.user_role import UserRoleInAssign
-
-user_image_url = "https://pics.freeicons.io/uploads/icons/png/4987345791543238941-512.png"
-role_image_url = "https://pics.freeicons.io/uploads/icons/png/17113912771681927333-512.png"
-event_image_url = "https://pics.freeicons.io/uploads/icons/png/4567109991623563293-512.png"
-event_type_image_url = "https://pics.freeicons.io/uploads/icons/png/9966980361555936928-512.png"
-permission_image_url = "https://pics.freeicons.io/uploads/icons/png/14474864961681877876-512.png"
+from settings import EVENT_IMAGE_URL, EVENT_TYPE_IMAGE_URL, PERMISSION_IMAGE_URL, ROLE_IMAGE_URL, USER_IMAGE_URL
 
 
 class LogEmbed(discord.Embed):
@@ -40,7 +35,7 @@ class EventLog(LogEmbed):
     """Embed for event logs"""
     async def load_data(self, event_operation: str, event: EventInResponse) -> None:
         await self.set_color_by_operation(event_operation)
-        self.set_thumbnail(url=event_image_url)
+        self.set_thumbnail(url=EVENT_IMAGE_URL)
         self.title = f"{event_operation} Event".upper()
         self.add_field(name="ID", value=str(event.id))
         self.add_field(name="Created By", value=str(event.created_by))
@@ -58,7 +53,7 @@ class EventTypeLog(LogEmbed):
     """Embed for event type logs"""
     async def load_data(self, event_operation: str, event_type: EventTypeInResponse) -> None:
         await self.set_color_by_operation(event_operation)
-        self.set_thumbnail(url=event_type_image_url)
+        self.set_thumbnail(url=EVENT_TYPE_IMAGE_URL)
         self.title = f"{event_operation} Event Type".upper()
         self.add_field(name="ID", value=str(event_type.id))
         self.add_field(name="Name", value=event_type.name)
@@ -69,7 +64,7 @@ class RoleLog(LogEmbed):
     """Embed for role logs"""
     async def load_data(self, event_operation: str, role: RoleInResponse) -> None:
         await self.set_color_by_operation(event_operation)
-        self.set_thumbnail(url=role_image_url)
+        self.set_thumbnail(url=ROLE_IMAGE_URL)
         self.title = f"{event_operation} Role".upper()
         self.add_field(name="ID", value=str(role.id))
         self.add_field(name="Name", value=role.name)
@@ -79,7 +74,7 @@ class UserLog(LogEmbed):
     """Embed for user logs"""
     async def load_data(self, event_operation: str, user: UserInResponse) -> None:
         await self.set_color_by_operation(event_operation)
-        self.set_thumbnail(url=user_image_url)
+        self.set_thumbnail(url=USER_IMAGE_URL)
         self.title = f"{event_operation} User".upper()
         self.add_field(name="ID", value=str(user.id))
         self.add_field(name="Username", value=user.authorized_user.username)
@@ -92,7 +87,7 @@ class UserRoleLog(LogEmbed):
     """Embed for user role logs"""
     async def load_data(self, event_operation: str, user_role: UserRoleInAssign) -> None:
         await self.set_color_by_operation(event_operation)
-        self.set_thumbnail(url=role_image_url)
+        self.set_thumbnail(url=ROLE_IMAGE_URL)
         self.title = f"{event_operation} Role".upper()
         self.add_field(name="Username", value=str(user_role.username))
         self.add_field(name="Role name", value=str(user_role.role_name))
@@ -102,7 +97,7 @@ class PermissionLog(LogEmbed):
     """Embed for permission logs"""
     async def load_data(self, event_operation: str, permission: RoleEventTypeInResponse) -> None:
         await self.set_color_by_operation(event_operation)
-        self.set_thumbnail(url=permission_image_url)
+        self.set_thumbnail(url=PERMISSION_IMAGE_URL)
         self.title = f"{event_operation} Permission".upper()
         self.add_field(name="Role ID", value=str(permission.role_id))
         self.add_field(name="EventType ID", value=str(permission.event_type_id))
