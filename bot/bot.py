@@ -22,11 +22,12 @@ from bot.requests.http_client import HttpClient
 from bot.requests.event import get_events
 from bot.authorization.backend import login
 from settings import (SERVER_PORT, SERVER_HOST, NOTIFICATION_ENDPOINT, GUILD_ID,
-                      CATEGORY_NAME, CALENDAR_CHANNEL_NAME, NOTIFICATION_CHANNEL_NAME, COMMAND_CHANNEL_NAME)
+                      CATEGORY_NAME, CALENDAR_CHANNEL_NAME, NOTIFICATION_CHANNEL_NAME,
+                      COMMAND_CHANNEL_NAME, EVENT_CHANNEL_NAME)
 
 
 class PRDBot(commands.Bot):
-    """The PRD Discord bot."""
+    """The PRD Discord bot"""
 
     def __init__(self) -> None:
         # Bot
@@ -59,28 +60,30 @@ class PRDBot(commands.Bot):
         self.http_client: HttpClient = HttpClient(self.get_token, self.set_auth_user)
 
         self.MAIN_GUILD = None
+        self.CATEGORY = None
 
         # Channels
         self.CALENDAR_CHANNEL_ID = -1
         self.NOTIFICATION_CHANNEL_ID = -1
         self.COMMAND_CHANNEL_ID = -1
+        self.EVENT_CHANNEL_ID = -1
 
     async def on_ready(self) -> None:
-        print("------")
-        print("Les Peaux Rouges - Discord Bot")
-        print(self.user.name)
-        print("------")
+        """Set up the bot when it's ready"""
+        self.logger.info("------")
+        self.logger.info("Les Peaux Rouges - Discord Bot")
+        self.logger.info(self.user.name)
+        self.logger.info("------")
         await self.init_channels()
-        print("------")
+        self.logger.info("------")
         try:
             await login(self.get_http_client, self.set_auth_user)
         except ConnectionRefusedError as e:
-            print(e)
+            self.logger.exception(e)
             await self.close()
-        print("------")
+        self.logger.info("------")
         await self.start_server()
-        print("------")
-        print("READY TO GO !")
+        self.logger.info("Bot ready")
 
     async def register_command(
             self, command: ApplicationCommand, force: bool = True, guild_ids: list[int] | None = None
@@ -88,47 +91,61 @@ class PRDBot(commands.Bot):
         pass
 
     def get_token(self) -> str:
+        """Get the token of the authorized user"""
         if self.auth_user is None:
             return ""
         return self.auth_user.authorized_user.token
 
     def set_auth_user(self, auth_user) -> None:
+        """Set the authorized user"""
         self.auth_user = auth_user
 
     def get_http_client(self):
+        """Get the http client"""
         return lambda: self.http_client
 
     async def init_channels(self):
-        print("INITIALIZING CHANNELS...")
+        """Initialize the channels if they don't exist"""
+        self.logger.info("Initializing channels...")
         guild = self.get_guild(int(GUILD_ID))
         self.MAIN_GUILD = guild
         category = discord.utils.get(guild.categories, name=CATEGORY_NAME)
+        self.CATEGORY = category
         if category is None:
             category = await guild.create_category(CATEGORY_NAME)
-            print("CATEGORY CREATED")
+            logging.debug("Category created")
 
         calendar_channel = discord.utils.get(guild.channels, name=CALENDAR_CHANNEL_NAME.lower())
         if calendar_channel is None:
             calendar_channel = await guild.create_text_channel(CALENDAR_CHANNEL_NAME, category=category)
-            print("CALENDAR CHANNEL CREATED")
+            logging.debug("Calendar channel created")
 
         notification_channel = discord.utils.get(guild.channels, name=NOTIFICATION_CHANNEL_NAME.lower())
         if notification_channel is None:
             notification_channel = await guild.create_text_channel(NOTIFICATION_CHANNEL_NAME, category=category)
-            print("NOTIFICATION CHANNEL CREATED")
+            logging.debug("Notification channel created")
 
         command_channel = discord.utils.get(guild.channels, name=COMMAND_CHANNEL_NAME.lower())
         if command_channel is None:
             command_channel = await guild.create_text_channel(COMMAND_CHANNEL_NAME, category=category)
-            print("COMMAND CHANNEL CREATED")
+            logging.debug("Command channel created")
+
+        event_channel = discord.utils.get(guild.channels, name=EVENT_CHANNEL_NAME.lower())
+        if event_channel is None:
+            event_channel = await guild.create_text_channel(EVENT_CHANNEL_NAME, category=category)
+            logging.info("Event channel created")
 
         self.CALENDAR_CHANNEL_ID = calendar_channel.id
         self.NOTIFICATION_CHANNEL_ID = notification_channel.id
         self.COMMAND_CHANNEL_ID = command_channel.id
+        self.EVENT_CHANNEL_ID = event_channel.id
+
         print("CHANNELS INITIALIZED")
+        logging.info("Channels initialized")
 
     async def start_server(self):
-        print("STARTING SERVER...")
+        """Start the server to receive events from the backend"""
+        self.logger.info("Starting server...")
         app = web.Application()
         app.router.add_post(NOTIFICATION_ENDPOINT, self.on_event)
 
@@ -136,7 +153,7 @@ class PRDBot(commands.Bot):
         await runner.setup()
         site = web.TCPSite(runner=runner, host=SERVER_HOST, port=SERVER_PORT)
         await site.start()
-        print(f"SERVER STARTED. AWAITING EVENTS ON: {NOTIFICATION_ENDPOINT}")
+        logging.info(f"Server started. Awaiting events on: {NOTIFICATION_ENDPOINT}")
 
     async def on_event(self, request):
         response = await request.json()
@@ -188,12 +205,14 @@ class PRDBot(commands.Bot):
             if operation_type == "event":
                 await self.create_calendar()
 
+            self.logger.debug("Received event: %s", response)
         else:
-            print(f"Unsupported operation type: {operation_type}")
-
+            self.logger.error(f"Unsupported operation type: {operation_type}")
             return web.Response()
 
     async def create_calendar(self):
+        """Create the calendar embed"""
+        self.logger.info("Creating calendar...")
         events = await get_events(self.http_client)
         embed = await CalendarEmbed(events=events).build()
         channel = await self.fetch_channel(self.CALENDAR_CHANNEL_ID)
@@ -206,3 +225,5 @@ class PRDBot(commands.Bot):
             await last_message[0].edit(embed=embed)
         else:
             await channel.send(embed=embed)  # type: ignore
+
+        self.logger.info("Calendar created")
