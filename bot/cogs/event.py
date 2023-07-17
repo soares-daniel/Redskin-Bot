@@ -3,7 +3,7 @@ import logging
 from discord.ext import commands
 
 from bot.bot import PRDBot
-from bot.views.event import EventSelect
+from bot.views.event import EventView
 from settings import EVENT_CHANNEL_NAME
 
 
@@ -32,14 +32,18 @@ class Event(commands.Cog):
         # Check event select menu
         last_message = await event_channel.history(limit=1).flatten()
         if not last_message:
-            event_select = EventSelect(self.bot, logger=self.logger)
-            await event_select.build()
-            await event_channel.send(content="", view=event_select)
+            event_view = EventView(self.bot, logger=self.logger)
+            await event_channel.send(content="", view=event_view)
             self.logger.info("Event select menu added.")
+        else:
+            last_message = last_message[0]
+            event_view = EventView(self.bot, logger=self.logger)
+            await last_message.edit(view=event_view)
+            self.logger.info("Event select menu edited.")
 
         # Add persistent view
         if not self.persistent_added:
-            self.bot.add_view(EventSelect(self.bot, logger=self.logger))
+            self.bot.add_view(EventView(self.bot, logger=self.logger))
             self.persistent_added = True
             self.logger.info("Persistent view added.")
 

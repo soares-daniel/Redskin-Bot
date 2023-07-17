@@ -1,5 +1,7 @@
 from typing import List
 
+import requests
+
 from bot.requests.http_client import HttpClient
 from models.schemas.event_type import EventTypeInResponse
 from settings import API_URL
@@ -31,17 +33,19 @@ async def get_events(
     return db_event_list
 
 
-async def get_event_types(
+def get_event_types(
         http_client: HttpClient
 ) -> List[EventTypeInResponse]:
     """Get all event types"""
-    db_event_types = await http_client.get(f"{EVENT_URL}/event_types")
+
+    response = requests.get(f"{EVENT_URL}/event_types")
+    db_event_types = response.json()
     db_event_type_list = list()
     for db_event_type in db_event_types:  # type: ignore
         event_type = EventTypeInResponse(
-            id=db_event_type.get("id"),
-            name=db_event_type.get("name"),
-            description=db_event_type.get("description"),
+            id=db_event_type.get("id"),  # type: ignore
+            name=db_event_type.get("name"),  # type: ignore
+            description=db_event_type.get("description"),  # type: ignore
         )
         db_event_type_list.append(event_type)
 
@@ -50,13 +54,12 @@ async def get_event_types(
 
 async def create_event(
         http_client: HttpClient,
-        event: EventInCreate
+        event: dict
 ) -> EventInResponse:
     """Create an event"""
 
-    data = event.dict()
 
-    db_event = await http_client.post(url=f"{EVENT_URL}/create", data=data)  # type: ignore
+    db_event = await http_client.post(url=f"{EVENT_URL}/create", data=event)  # type: ignore
 
     created_event = EventInResponse(
         id=db_event.get("id"),  # type: ignore

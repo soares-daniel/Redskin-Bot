@@ -6,7 +6,6 @@ import discord
 from bot.bot import PRDBot
 from bot.requests.event import create_event
 from models.schemas.event_type import EventTypeInResponse
-from models.schemas.event import EventInCreate
 
 
 class EventModal(discord.ui.Modal):
@@ -50,6 +49,8 @@ class EventModal(discord.ui.Modal):
     async def callback(self, interaction: discord.Interaction) -> None:
         """Callback for the modal."""
         # Parse fields and validate
+        await interaction.response.defer()
+
         title = self.children[0].value
         description = self.children[1].value
         start_date_str = self.children[2].value
@@ -66,13 +67,14 @@ class EventModal(discord.ui.Modal):
             return
 
         # Create event
-        event = EventInCreate()
-        event.created_by = 2  # Superuser
-        event.event_type = self.event_type.id
-        event.title = title
-        event.description = description
-        event.start_date = start_date
-        event.end_date = end_date
+        event = {
+            "createdBy": 2,  # Superuser
+            "eventType": self.event_type.id,
+            "title": title,
+            "description": description,
+            "startDate": start_date.isoformat(),
+            "endDate": end_date.isoformat()
+        }
         created_event = await create_event(self.bot.http_client, event)
 
         if created_event:
