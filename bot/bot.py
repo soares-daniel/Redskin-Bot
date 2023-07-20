@@ -1,11 +1,11 @@
+import sys
 import json
-import logging
-from logging import handlers
 
 import discord
-from aiohttp import web
 from discord import Activity, ActivityType, Intents, ApplicationCommand
 from discord.ext import commands
+from aiohttp import web
+from loguru import logger
 
 from bot.embeds.calendar import CalendarEmbed
 from bot.embeds.logging import (LogEmbed, EventLog, EventTypeLog, RoleLog,
@@ -23,7 +23,7 @@ from bot.requests.event import get_events
 from bot.authorization.backend import login
 from settings import (SERVER_PORT, SERVER_HOST, NOTIFICATION_ENDPOINT, GUILD_ID,
                       CATEGORY_NAME, CALENDAR_CHANNEL_NAME, NOTIFICATION_CHANNEL_NAME,
-                      COMMAND_CHANNEL_NAME, EVENT_CHANNEL_NAME)
+                      COMMAND_CHANNEL_NAME, EVENT_CHANNEL_NAME, LOGGING_FORMAT)
 
 
 class PRDBot(commands.Bot):
@@ -35,24 +35,11 @@ class PRDBot(commands.Bot):
         intents = Intents.all()
         super().__init__(activity=activity, command_prefix="!", intents=intents)
         
-        # Logging
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
-        file_handler = handlers.TimedRotatingFileHandler(
-            filename="logs/discord.log", when="midnight", backupCount=7
-        )
-        formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)-8s - %(name)s - %(funcName)s - %(message)s"
-        )
-        file_handler.setFormatter(formatter)
-        stream_handler = logging.StreamHandler()
-        stream_handler.setFormatter(formatter)
-        stream_handler.setLevel(logging.ERROR)
-        logger.addHandler(file_handler)
-        logger.addHandler(stream_handler)
+        # logger
+        logger.remove()
+        logger.add("logs/discord.log", rotation="00:00", format=LOGGING_FORMAT, level="DEBUG", retention="7 days")
+        logger.add(sys.stdout, colorize=True, format=LOGGING_FORMAT, level="INFO")
 
-        self.file_handler = file_handler
-        self.stream_handler = stream_handler
         self.logger = logger
 
         # Backend
@@ -60,8 +47,7 @@ class PRDBot(commands.Bot):
         self.http_client: HttpClient = HttpClient(
             get_token=self.get_token,
             set_auth_user=self.set_auth_user,
-            file_handler=self.file_handler,
-            stream_handler=self.stream_handler
+            logger=self.logger
         )
 
         self.MAIN_GUILD = None
@@ -118,34 +104,34 @@ class PRDBot(commands.Bot):
         self.CATEGORY = category
         if category is None:
             category = await guild.create_category(CATEGORY_NAME)
-            logging.debug("Category created")
+            self.logger.debug("Category created")
 
         calendar_channel = discord.utils.get(guild.channels, name=CALENDAR_CHANNEL_NAME.lower())
         if calendar_channel is None:
             calendar_channel = await guild.create_text_channel(CALENDAR_CHANNEL_NAME, category=category)
-            logging.debug("Calendar channel created")
+            self.logger.debug("Calendar channel created")
 
         notification_channel = discord.utils.get(guild.channels, name=NOTIFICATION_CHANNEL_NAME.lower())
         if notification_channel is None:
             notification_channel = await guild.create_text_channel(NOTIFICATION_CHANNEL_NAME, category=category)
-            logging.debug("Notification channel created")
+            self.logger.debug("Notification channel created")
 
         command_channel = discord.utils.get(guild.channels, name=COMMAND_CHANNEL_NAME.lower())
         if command_channel is None:
             command_channel = await guild.create_text_channel(COMMAND_CHANNEL_NAME, category=category)
-            logging.debug("Command channel created")
+            self.logger.debug("Command channel created")
 
         event_channel = discord.utils.get(guild.channels, name=EVENT_CHANNEL_NAME.lower())
         if event_channel is None:
             event_channel = await guild.create_text_channel(EVENT_CHANNEL_NAME, category=category)
-            logging.info("Event channel created")
+            self.logger.debug("Event channel created")
 
         self.CALENDAR_CHANNEL_ID = calendar_channel.id
         self.NOTIFICATION_CHANNEL_ID = notification_channel.id
         self.COMMAND_CHANNEL_ID = command_channel.id
         self.EVENT_CHANNEL_ID = event_channel.id
 
-        logging.info("Channels initialized")
+        self.logger.info("Channels initialized")
 
     async def start_server(self):
         """Start the server to receive events from the backend"""
@@ -156,8 +142,9 @@ class PRDBot(commands.Bot):
         runner = web.AppRunner(app)
         await runner.setup()
         site = web.TCPSite(runner=runner, host=SERVER_HOST, port=SERVER_PORT)
+        self.logger.info(f"Server will listen on: {SERVER_HOST}:{SERVER_PORT}")
         await site.start()
-        logging.info(f"Server started. Awaiting events on: {NOTIFICATION_ENDPOINT}")
+        self.logger.info(f"Server started. Awaiting events on: {NOTIFICATION_ENDPOINT}")
 
     async def on_event(self, request):
         response = await request.json()

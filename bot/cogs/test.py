@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 
 import discord
@@ -12,10 +11,6 @@ from settings import API_URL
 class Test(commands.Cog):
     def __init__(self, bot: PRDBot) -> None:
         self.bot = bot
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        self.logger.addHandler(self.bot.file_handler)
-        self.logger.addHandler(self.bot.stream_handler)
 
     @commands.slash_command(name="test_event", description="Creates and deletes an event for testing purposes")
     async def test_event(self, ctx: discord.ApplicationContext):

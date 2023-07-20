@@ -1,4 +1,3 @@
-import logging
 import typing
 
 import aiohttp
@@ -14,7 +13,7 @@ def handle_http_errors(func):
             if e.status == 401:
                 # Logging
                 self.logger.error(f"Unauthorized error, logging in...")
-                await login(self, self.set_auth_user)
+                await login(self, self.set_auth_user, self.get_token)
                 return await func(self, *args, **kwargs)
             else:
                 raise e
@@ -26,15 +25,11 @@ class HttpClient:
             self,
             get_token,
             set_auth_user,
-            file_handler: logging.FileHandler,
-            stream_handler: logging.StreamHandler
+            logger,
     ) -> None:
         self.get_token = get_token
         self.set_auth_user = set_auth_user
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        self.logger.addHandler(file_handler)
-        self.logger.addHandler(stream_handler)
+        self.logger = logger
 
     @handle_http_errors
     async def get(

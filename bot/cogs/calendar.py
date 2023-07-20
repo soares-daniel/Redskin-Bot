@@ -1,5 +1,3 @@
-import logging
-
 import discord
 from discord.ext import commands
 
@@ -11,10 +9,6 @@ from bot.requests.event import get_events
 class Calendar(commands.Cog):
     def __init__(self, bot: PRDBot) -> None:
         self.bot = bot
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.DEBUG)
-        self.logger.addHandler(self.bot.file_handler)
-        self.logger.addHandler(self.bot.stream_handler)
 
     @commands.slash_command(name="calendar", description="Get the calendar")
     async def calendar(self, ctx: discord.ApplicationContext):
