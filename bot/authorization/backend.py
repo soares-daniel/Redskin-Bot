@@ -29,6 +29,8 @@ async def login(get_http_client, set_auth_user, logger) -> None:
                                 updated_at=authorized_user.get('updatedAt'),
                             ),
                         )
+            else:
+                raise ConnectionRefusedError(user_response)
             set_auth_user(auth_user)
             logger.info("Login successful")
             break
