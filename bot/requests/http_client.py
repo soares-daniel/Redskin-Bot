@@ -31,6 +31,23 @@ class HttpClient:
         self.set_auth_user = set_auth_user
         self.logger = logger
 
+    def log_request(self, method, url, headers, data=None, params=None):
+        self.logger.debug(f"{method} {url}")
+
+        if params:
+            self.logger.debug("Params:")
+            for name, value in params.items():
+                self.logger.debug(f"\t{name}: {value}")
+
+        self.logger.debug("Headers:")
+        for name, value in headers.items():
+            self.logger.debug(f"\t{name}: {value}")
+
+        if data:
+            self.logger.debug("Data:")
+            for name, value in data.items():
+                self.logger.debug(f"\t{name}: {value}")
+
     @handle_http_errors
     async def get(
             self, url: str,
@@ -40,7 +57,7 @@ class HttpClient:
             headers = {
                 "Authorization": f"Bearer {token}"
             }
-            self.logger.debug(f"GET request to {url} with headers {headers}")
+            self.log_request("GET", url, headers)
             async with session.get(url, headers=headers) as response:
                 return await response.json()
 
@@ -53,7 +70,7 @@ class HttpClient:
             headers = {
                 "Authorization": f"Bearer {token}"
             }
-            self.logger.debug(f"POST request to {url} with headers {headers} and data {data}")
+            self.log_request("POST", url, headers, data=data)
             async with session.post(url, json=data, headers=headers) as response:
                 final = await response.json()
                 return final
@@ -67,19 +84,19 @@ class HttpClient:
             headers = {
                 "Authorization": f"Bearer {token}"
             }
-            self.logger.debug(f"PUT request to {url} with headers {headers} and data {data}")
+            self.log_request("PUT", url, headers, data=data)
             async with session.put(url, json=data, headers=headers) as response:
                 return await response.json()
 
     @handle_http_errors
     async def delete(
-            self, url
+            self, url: str, data,
     ) -> typing.Type[typing.Dict[str, typing.Any] | typing.List[typing.Dict[str, typing.Any]]]:
         async with aiohttp.ClientSession() as session:
             token = self.get_token()
             headers = {
                 "Authorization": f"Bearer {token}"
             }
-            self.logger.debug(f"DELETE request to {url} with headers {headers}")
+            self.log_request("DELETE", url, headers)
             async with session.delete(url, headers=headers) as response:
                 return await response.json()
