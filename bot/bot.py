@@ -74,6 +74,7 @@ class PRDBot(commands.Bot):
             await self.close()
         self.logger.info("------")
         await self.start_server()
+        self.logger.info("------")
         self.logger.info("Bot ready")
 
     async def register_command(
@@ -203,7 +204,7 @@ class PRDBot(commands.Bot):
 
     async def create_calendar(self):
         """Create the calendar embed"""
-        self.logger.info("Creating calendar...")
+        self.logger.debug("Creating calendar...")
         events = await get_events(self.http_client)
         embed = await CalendarEmbed(events=events).build()
         channel = await self.fetch_channel(self.CALENDAR_CHANNEL_ID)
@@ -217,4 +218,4 @@ class PRDBot(commands.Bot):
         else:
             await channel.send(embed=embed)  # type: ignore
 
-        self.logger.info("Calendar created")
+        self.logger.debug("Calendar created")

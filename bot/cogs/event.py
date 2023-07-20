@@ -34,7 +34,7 @@ class Event(commands.Cog):
             last_message = last_message[0]
             event_view = EventView(self.bot, logger=self.logger)
             await last_message.edit(view=event_view)
-            self.logger.info("Event select menu edited.")
+            self.logger.debug("Event select menu edited.")
 
         # Add persistent view
         if not self.persistent_added:
