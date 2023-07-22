@@ -48,6 +48,7 @@ class PRDBot(commands.Bot):
             set_auth_user=self.set_auth_user,
             logger=self.logger
         )
+        self.notification_server = None
 
         self.MAIN_GUILD = None
         self.CATEGORY = None
@@ -138,6 +139,7 @@ class PRDBot(commands.Bot):
         site = web.TCPSite(runner=runner, host=SERVER_HOST, port=SERVER_PORT)
         self.logger.info(f"Server will listen on: {SERVER_HOST}:{SERVER_PORT}")
         await site.start()
+        self.notification_server = site
         self.logger.info(f"Server started. Awaiting events on: {NOTIFICATION_ENDPOINT}")
 
     async def on_event(self, request):
