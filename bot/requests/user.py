@@ -3,7 +3,7 @@ from typing import List
 from bot.requests.http_client import HttpClient
 from models.schemas.role import RoleInResponse
 from settings import API_URL
-from models.schemas.user import UserInResponse, UserWithToken
+from models.schemas.user import UserInResponse
 
 USER_URL = f"{API_URL}/users"
 
@@ -15,18 +15,13 @@ async def get_users(
     db_users = await http_client.get(USER_URL)
     db_user_list = list()
     for db_user in db_users:  # type: ignore
-        authorized_user = db_user.get('authorizedUser')
-        if authorized_user:
-            user = UserInResponse(
-                id=db_user.get("id"),
-                authorized_user=UserWithToken(
-                    token=authorized_user.get('token'),
-                    username=authorized_user.get('username'),
-                    created_at=authorized_user.get('createdAt'),
-                    updated_at=authorized_user.get('updatedAt'),
-                ),
-            )
-            db_user_list.append(user)
+        user = UserInResponse(
+            id=db_user.get("id"),
+            username=db_user.get('username'),
+            created_at=db_user.get('createdAt'),
+            updated_at=db_user.get('updatedAt'),
+        )
+        db_user_list.append(user)
 
     return db_user_list
 

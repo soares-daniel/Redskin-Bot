@@ -45,7 +45,6 @@ class PRDBot(commands.Bot):
         # Backend
         self.auth_user = None
         self.http_client: HttpClient = HttpClient(
-            get_token=self.get_token,
             set_auth_user=self.set_auth_user,
             logger=self.logger
         )
@@ -81,12 +80,6 @@ class PRDBot(commands.Bot):
             self, command: ApplicationCommand, force: bool = True, guild_ids: list[int] | None = None
     ) -> None:
         pass
-
-    def get_token(self) -> str:
-        """Get the token of the authorized user"""
-        if self.auth_user is None:
-            return ""
-        return self.auth_user.authorized_user.token
 
     def set_auth_user(self, auth_user) -> None:
         """Set the authorized user"""
@@ -198,6 +191,7 @@ class PRDBot(commands.Bot):
                 await self.create_calendar()
 
             self.logger.debug(f"Received event: {response}")
+            return web.Response(text="OK")
         else:
             self.logger.error(f"Unsupported operation type: {operation_type}")
             return web.Response()

@@ -18,13 +18,9 @@ class UserInLogin(BaseSchemaModel):
     password: str
 
 
-class UserWithToken(BaseSchemaModel):
-    token: str
+class UserInResponse(BaseSchemaModel):
+    id: int
     username: str
     created_at: datetime.datetime
     updated_at: datetime.datetime | None
 
-
-class UserInResponse(BaseSchemaModel):
-    id: int
-    authorized_user: UserWithToken

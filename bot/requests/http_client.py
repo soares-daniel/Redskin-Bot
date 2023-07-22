@@ -23,12 +23,11 @@ def handle_http_errors(func):
 class HttpClient:
     def __init__(
             self,
-            get_token,
             set_auth_user,
             logger,
     ) -> None:
-        self.get_token = get_token
-        self.set_auth_user = set_auth_user
+        self.set_user = set_auth_user
+        self.session = aiohttp.ClientSession()
         self.logger = logger
 
     def log_request(self, method, url, headers, data=None, params=None):
@@ -49,54 +48,45 @@ class HttpClient:
                 self.logger.debug(f"\t{name}: {value}")
 
     @handle_http_errors
+    async def post_raw(
+            self, url: str, data,
+    ) -> typing.Type[typing.Dict[str, typing.Any] | typing.List[typing.Dict[str, typing.Any]]]:
+        """Only used for login because of the token potentially not stored in cookies yet"""
+        self.log_request("POST", url, {}, data=data)
+        async with self.session.post(url, json=data) as response:
+            return await response.json()
+
+    @handle_http_errors
     async def get(
             self, url: str,
     ) -> typing.Type[typing.Dict[str, typing.Any] | typing.List[typing.Dict[str, typing.Any]]]:
-        async with aiohttp.ClientSession() as session:
-            token = self.get_token()
-            headers = {
-                "Authorization": f"Bearer {token}"
-            }
-            self.log_request("GET", url, headers)
-            async with session.get(url, headers=headers) as response:
-                return await response.json()
+        self.log_request("GET", url, {})
+        async with self.session.get(url) as response:
+            return await response.json()
 
     @handle_http_errors
     async def post(
             self, url: str, data,
     ) -> typing.Type[typing.Dict[str, typing.Any] | typing.List[typing.Dict[str, typing.Any]]]:
-        async with aiohttp.ClientSession() as session:
-            token = self.get_token()
-            headers = {
-                "Authorization": f"Bearer {token}"
-            }
-            self.log_request("POST", url, headers, data=data)
-            async with session.post(url, json=data, headers=headers) as response:
-                final = await response.json()
-                return final
+        self.log_request("POST", url, {}, data=data)
+        async with self.session.post(url, json=data) as response:
+            return await response.json()
 
     @handle_http_errors
     async def put(
             self, url: str, data,
     ) -> typing.Type[typing.Dict[str, typing.Any] | typing.List[typing.Dict[str, typing.Any]]]:
-        async with aiohttp.ClientSession() as session:
-            token = self.get_token()
-            headers = {
-                "Authorization": f"Bearer {token}"
-            }
-            self.log_request("PUT", url, headers, data=data)
-            async with session.put(url, json=data, headers=headers) as response:
-                return await response.json()
+        self.log_request("PUT", url, {}, data=data)
+        async with self.session.put(url, json=data) as response:
+            return await response.json()
 
     @handle_http_errors
     async def delete(
-            self, url: str, data,
+            self, url: str
     ) -> typing.Type[typing.Dict[str, typing.Any] | typing.List[typing.Dict[str, typing.Any]]]:
-        async with aiohttp.ClientSession() as session:
-            token = self.get_token()
-            headers = {
-                "Authorization": f"Bearer {token}"
-            }
-            self.log_request("DELETE", url, headers)
-            async with session.delete(url, headers=headers) as response:
-                return await response.json()
+        self.log_request("DELETE", url, {})
+        async with self.session.delete(url) as response:
+            return await response.json()
+
+    async def close(self):
+        await self.session.close()
