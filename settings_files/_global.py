@@ -3,7 +3,6 @@ import os
 SETTINGS_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(SETTINGS_DIR)
 DATA_DIR = os.path.join(ROOT_DIR, 'data')
-LOGGING_FORMAT = os.getenv('LOGGING_FORMAT')
 
 SERVER_PORT = os.getenv('SERVER_PORT')
 SERVER_HOST = os.getenv('SERVER_HOST')

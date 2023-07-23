@@ -23,7 +23,7 @@ from bot.requests.event import get_events
 from bot.authorization.backend import login
 from settings import (SERVER_PORT, SERVER_HOST, NOTIFICATION_ENDPOINT, GUILD_ID,
                       CATEGORY_NAME, CALENDAR_CHANNEL_NAME, NOTIFICATION_CHANNEL_NAME,
-                      COMMAND_CHANNEL_NAME, EVENT_CHANNEL_NAME, LOGGING_FORMAT)
+                      COMMAND_CHANNEL_NAME, EVENT_CHANNEL_NAME)
 
 
 class PRDBot(commands.Bot):
@@ -36,6 +36,7 @@ class PRDBot(commands.Bot):
         super().__init__(activity=activity, command_prefix="!", intents=intents)
         
         # logger
+        LOGGING_FORMAT = "<green>{time:HH:mm:ss.SSSZ}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
         logger.remove()
         logger.add("logs/discord.log", rotation="00:00", format=LOGGING_FORMAT, level="DEBUG", retention="7 days")
         logger.add(sys.stdout, colorize=True, format=LOGGING_FORMAT, level="INFO")
