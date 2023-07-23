@@ -5,7 +5,7 @@ import requests
 from bot.requests.http_client import HttpClient
 from models.schemas.event_type import EventTypeInResponse
 from settings import API_URL
-from models.schemas.event import EventInResponse, EventInCreate
+from models.schemas.event import EventInResponse
 
 EVENT_URL = f"{API_URL}/events"
 
@@ -14,7 +14,7 @@ async def get_events(
         http_client: HttpClient
 ) -> List[EventInResponse]:
     """Get all events"""
-    db_events = await http_client.get(EVENT_URL)
+    db_events = await http_client.get(f"{EVENT_URL}/user")
     db_event_list = list()
     for db_event in db_events:  # type: ignore
         event = EventInResponse(
@@ -57,7 +57,6 @@ async def create_event(
         event: dict
 ) -> EventInResponse:
     """Create an event"""
-
 
     db_event = await http_client.post(url=f"{EVENT_URL}/create", data=event)  # type: ignore
 

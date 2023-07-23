@@ -4,7 +4,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 if DEBUG:
     print("DEBUG mode is enabled")
     env_path = Path(".") / ".env.debug"
