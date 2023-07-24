@@ -77,9 +77,9 @@ class UserLog(LogEmbed):
         self.set_thumbnail(url=USER_IMAGE_URL)
         self.title = f"{event_operation} User".upper()
         self.add_field(name="ID", value=str(user.id))
-        self.add_field(name="Username", value=user.authorized_user.username)
-        self.add_field(name="Created At", value=str(user.authorized_user.created_at), inline=False)
-        updated_at = user.authorized_user.updated_at
+        self.add_field(name="Username", value=user.username)
+        self.add_field(name="Created At", value=str(user.created_at), inline=False)
+        updated_at = user.updated_at
         self.add_field(name="Updated At", value=str(updated_at) if updated_at else "Never", inline=False)
 
 
