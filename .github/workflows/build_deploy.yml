@@ -47,5 +47,6 @@ jobs:
             git fetch --all
             git reset --hard origin/master
             git pull origin master
+            cd ..
             docker compose down
             docker compose up -d --build
