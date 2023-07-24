@@ -73,3 +73,19 @@ async def create_event(
     )
 
     return created_event
+
+
+async def get_event_types_async(
+        http_client: HttpClient
+) -> List[EventTypeInResponse]:
+    db_event_types = await http_client.get(f"{EVENT_URL}/event_types")
+    db_event_type_list = list()
+    for db_event_type in db_event_types:  # type: ignore
+        event_type = EventTypeInResponse(
+            id=db_event_type.get("id"),  # type: ignore
+            name=db_event_type.get("name"),  # type: ignore
+            description=db_event_type.get("description"),  # type: ignore
+        )
+        db_event_type_list.append(event_type)
+
+    return db_event_type_list

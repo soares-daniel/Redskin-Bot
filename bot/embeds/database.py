@@ -3,7 +3,7 @@ import discord
 from bot.bot import PRDBot
 from bot.requests.user import get_users
 from bot.requests.role import get_roles, get_role_event_types
-from bot.requests.event import get_event_types
+from bot.requests.event import get_event_types_async
 
 
 class DatabaseEmbed(discord.Embed):
@@ -58,7 +58,7 @@ class EventTypeEmbed(DatabaseEmbed):
 
     async def load_event_types(self):
         await self.load_items(
-            get_event_types,
+            get_event_types_async,
             ("id", lambda event_type: event_type.id),
             ("name", lambda event_type: event_type.name),
             ("description", lambda event_type: event_type.description)
