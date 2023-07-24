@@ -74,6 +74,7 @@ class PRDBot(commands.Bot):
             await login(self.get_http_client, self.set_auth_user, self.logger)
         except LoginFailedError:
             self.logger.error("Login failed! Shutting down...")
+            await self.http_client.close()
             await self.close()
         self.logger.info("------")
         await self.start_server()
