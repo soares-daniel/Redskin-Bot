@@ -8,6 +8,10 @@ from settings import API_URL, USERNAME, PASSWORD
 AUTH_URL = f"{API_URL}/authorization/login"
 
 
+class LoginFailedError(Exception):
+    """Exception raised when login attempts fail."""
+
+
 async def login(get_http_client, set_auth_user, logger) -> None:
     """Login to API"""
     logger.info("Attempting to login to API...")
@@ -24,14 +28,13 @@ async def login(get_http_client, set_auth_user, logger) -> None:
                     created_at=user_response.get('createdAt'),
                     updated_at=user_response.get('updatedAt')
                 )
-            else:
-                raise ConnectionRefusedError(user_response)
-            set_auth_user(user)
+                set_auth_user(user)
             logger.info("Login successful")
             break
         except ClientConnectorError:
-            logger.error(f"Connection unsuccessful, API may be down! (Attempt {attempt+1}/3)")
+            logger.warning(f"Connection unsuccessful, API may be down! (Attempt {attempt+1}/3)")
             if attempt < 2:  # If it's not the last attempt, wait a bit before trying again
                 await asyncio.sleep(5)
-            else:
-                raise ConnectionRefusedError("FAILED TO CONNECT TO API, SHUTTING DOWN...")
+    else:
+        logger.error("All attempts to connect to the API have failed")
+        raise LoginFailedError("Unable to login after 3 attempts")

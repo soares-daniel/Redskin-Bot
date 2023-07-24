@@ -2,6 +2,7 @@ import sys
 import json
 
 import discord
+from bot.views.event import EventView
 from discord import Activity, ActivityType, Intents, ApplicationCommand
 from discord.ext import commands
 from aiohttp import web
@@ -20,7 +21,7 @@ from models.schemas.role_event_type import RoleEventTypeInResponse
 
 from bot.requests.http_client import HttpClient
 from bot.requests.event import get_events
-from bot.authorization.backend import login
+from bot.authorization.backend import login, LoginFailedError
 from settings import (SERVER_PORT, SERVER_HOST, NOTIFICATION_ENDPOINT, GUILD_ID,
                       CATEGORY_NAME, CALENDAR_CHANNEL_NAME, NOTIFICATION_CHANNEL_NAME,
                       COMMAND_CHANNEL_NAME, EVENT_CHANNEL_NAME)
@@ -53,6 +54,7 @@ class PRDBot(commands.Bot):
 
         self.MAIN_GUILD = None
         self.CATEGORY = None
+        self.persistent_added = False
 
         # Channels
         self.CALENDAR_CHANNEL_ID = -1
@@ -70,12 +72,15 @@ class PRDBot(commands.Bot):
         self.logger.info("------")
         try:
             await login(self.get_http_client, self.set_auth_user, self.logger)
-        except ConnectionRefusedError as e:
-            self.logger.exception(e)
+        except LoginFailedError:
+            self.logger.error("Login failed! Shutting down...")
             await self.close()
         self.logger.info("------")
         await self.start_server()
         self.logger.info("------")
+        await self.add_persistent_views()
+        self.logger.info("------")
+        await self.create_calendar()
         self.logger.info("Bot ready")
 
     async def register_command(
@@ -216,3 +221,34 @@ class PRDBot(commands.Bot):
             await channel.send(embed=embed)  # type: ignore
 
         self.logger.debug("Calendar created")
+
+    async def add_persistent_views(self) -> None:
+        """Add persistent views on startup"""
+        # Check event channel
+        self.logger.info("Adding persistent views...")
+        event_channel = await self.fetch_channel(self.EVENT_CHANNEL_ID)
+        if not event_channel:
+            self.logger.debug("Event channel not found. Creating one...")
+            guild = self.MAIN_GUILD
+            category = self.CATEGORY
+            event_channel = await guild.create_text_channel(name=EVENT_CHANNEL_NAME, category=category)
+            self.EVENT_CHANNEL_ID = event_channel.id
+            self.logger.debug("Event channel created.")
+
+        # Check event select menu
+        last_message = await event_channel.history(limit=1).flatten()
+        if not last_message:
+            event_view = EventView(self, logger=self.logger)
+            await event_channel.send(content="", view=event_view)
+            self.logger.debug("Event select menu added.")
+        else:
+            last_message = last_message[0]
+            event_view = EventView(self, logger=self.logger)
+            await last_message.edit(view=event_view)
+            self.logger.debug("Event select menu edited.")
+
+        # Add persistent view
+        if not self.persistent_added:
+            self.add_view(EventView(self, logger=self.logger))
+            self.persistent_added = True
+            self.logger.info("Persistent view added.")

@@ -3,7 +3,6 @@ import datetime
 
 import discord
 
-from bot.bot import PRDBot
 from bot.requests.event import create_event
 from models.schemas.event_type import EventTypeInResponse
 
@@ -11,7 +10,7 @@ from models.schemas.event_type import EventTypeInResponse
 class EventModal(discord.ui.Modal):
     """Event modal."""
 
-    def __init__(self, bot: PRDBot, logger: logging.Logger, event_type: EventTypeInResponse) -> None:
+    def __init__(self, bot, logger: logging.Logger, event_type: EventTypeInResponse) -> None:
         super().__init__(title=f"New Event: {event_type.name}")
         self.bot = bot
         self.logger = logger

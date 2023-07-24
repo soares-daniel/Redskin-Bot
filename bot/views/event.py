@@ -3,7 +3,6 @@ import logging
 
 import discord
 
-from bot.bot import PRDBot
 from bot.requests.event import get_event_types
 from bot.modals.event import EventModal
 from models.schemas.event_type import EventTypeInResponse
@@ -12,7 +11,7 @@ from models.schemas.event_type import EventTypeInResponse
 class EventSelect(discord.ui.Select):
     """Event select menu"""
 
-    def __init__(self, bot: PRDBot, logger: logging.Logger) -> None:
+    def __init__(self, bot, logger: logging.Logger) -> None:
         self.bot = bot
         self.logger = logger
         super().__init__(
@@ -53,7 +52,7 @@ class EventSelect(discord.ui.Select):
 
 
 class EventView(discord.ui.View):
-    def __init__(self, bot: PRDBot, logger: logging.Logger) -> None:
+    def __init__(self, bot, logger: logging.Logger) -> None:
         self.bot = bot
         self.logger = logger
         super().__init__(timeout=None)
