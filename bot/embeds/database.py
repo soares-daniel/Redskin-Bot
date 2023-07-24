@@ -30,7 +30,7 @@ class UserEmbed(DatabaseEmbed):
         await self.load_items(
             get_users,
             ("id", lambda user: user.id),
-            ("username", lambda user: user.authorized_user.username)
+            ("username", lambda user: user.username)
         )
 
 
