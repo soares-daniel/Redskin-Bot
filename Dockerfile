@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose the port the server will be running on
-EXPOSE 8000
+EXPOSE 5069
 
 # Set the entrypoint command for the container
 CMD ["python", "main.py"]
