@@ -7,9 +7,8 @@ from models.schemas.event import EventInResponse
 
 
 class CalendarPaginator(discord.ui.View):
-    def __init__(self, events: List[EventInResponse], *args, **kwargs) -> None:
-        super().__init__(timeout=None, *args, **kwargs)
-        self.custom_id = "calendar_paginator"
+    def __init__(self, events: List[EventInResponse]) -> None:
+        super().__init__(timeout=None)
         self.events = events
         self.current_page = 0
         self.last_page = 0

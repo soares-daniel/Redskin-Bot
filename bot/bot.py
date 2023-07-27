@@ -82,6 +82,7 @@ class PRDBot(commands.Bot):
         self.logger.info("------")
         await self.add_persistent_views()
         self.logger.info("------")
+        await self.create_calendar()
         self.logger.info("Bot ready")
 
     async def register_command(
