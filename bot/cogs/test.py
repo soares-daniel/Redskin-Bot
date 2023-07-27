@@ -4,7 +4,6 @@ import discord
 from discord.ext import commands
 
 from bot.bot import PRDBot
-from bot.requests.event import get_events
 from settings import API_URL
 
 
@@ -39,17 +38,25 @@ class Test(commands.Cog):
         await self.bot.http_client.delete(url=url)
         await ctx.send(f"Deleted event: {event_id}")
 
-    @commands.slash_command(name="del_all_events", description="Deletes all events for testing purposes")
-    async def del_all_events(self, ctx: discord.ApplicationContext):
-        await ctx.respond("Deleting all events...")
+    @commands.slash_command(name="test_user", description="Creates and deletes a user for testing purposes")
+    async def test_user(self, ctx: discord.ApplicationContext):
+        await ctx.respond("Creating user...")
 
-        url = f"{API_URL}/events"
-        events = await get_events(self.bot.http_client)
-        for event in events:
-            event_id = event.id  # type: ignore
-            url = f"{API_URL}/events/delete/{event_id}"
-            await self.bot.http_client.delete(url=url)
-            await ctx.send(f"Deleted event {event_id}")
+        url = f"{API_URL}/users/create"
+        user = {
+            "username": "test_user",
+            "password": "test_password"
+            }
+
+        new_user = await self.bot.http_client.post(url=url, data=user)
+        await ctx.send(f"Created user:\n{new_user}")
+
+        await ctx.send("Deleting user...")
+
+        user_id = new_user.get('id')  # type: ignore
+        url = f"{API_URL}/users/delete/{user_id}"
+        await self.bot.http_client.delete(url=url)
+        await ctx.send(f"Deleted user: {user_id}")
 
 
 def setup(bot) -> None:

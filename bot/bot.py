@@ -2,7 +2,6 @@ import sys
 import json
 
 import discord
-from bot.views.event import EventView
 from discord import Activity, ActivityType, Intents, ApplicationCommand
 from discord.ext import commands
 from aiohttp import web
@@ -11,6 +10,8 @@ from loguru import logger
 from bot.embeds.calendar import CalendarEmbed
 from bot.embeds.logging import (LogEmbed, EventLog, EventTypeLog, RoleLog,
                                 UserLog, UserRoleLog, PermissionLog)
+from bot.views.event import EventView
+from bot.views.calendar import CalendarPaginator
 from models.schemas.event import EventInResponse
 from models.schemas.event_type import EventTypeInResponse
 from models.schemas.role import RoleInResponse
@@ -32,7 +33,7 @@ class PRDBot(commands.Bot):
 
     def __init__(self) -> None:
         # Bot
-        activity = Activity(type=ActivityType.watching, name="Kalendar")
+        activity = Activity(type=ActivityType.watching, name="Calendar")
         intents = Intents.all()
         super().__init__(activity=activity, command_prefix="!", intents=intents)
         
@@ -208,7 +209,10 @@ class PRDBot(commands.Bot):
         """Create the calendar embed"""
         self.logger.debug("Creating calendar...")
         events = await get_events(self.http_client)
-        embed = await CalendarEmbed(events=events).build()
+        if len(events) < 10:
+            embed = await CalendarEmbed(events=events).build()
+        else:
+            paginator = await CalendarPaginator(events=events).build()
         channel = await self.fetch_channel(self.CALENDAR_CHANNEL_ID)
         if channel is None:
             return
@@ -216,9 +220,15 @@ class PRDBot(commands.Bot):
         # Get the last message
         last_message = await channel.history(limit=1).flatten()
         if last_message:
-            await last_message[0].edit(embed=embed)
+            if len(events) < 10:
+                await last_message[0].edit(embed=embed)
+            else:
+                await paginator.edit_message(message=last_message[0])
         else:
-            await channel.send(embed=embed)  # type: ignore
+            if len(events) < 10:
+                await channel.send(embed=embed)
+            else:
+                await paginator.send_message(channel=channel)
 
         self.logger.debug("Calendar created")
 
@@ -250,5 +260,8 @@ class PRDBot(commands.Bot):
         # Add persistent view
         if not self.persistent_added:
             self.add_view(EventView(self, logger=self.logger))
+            events = await get_events(self.http_client)
+            paginator = await CalendarPaginator(events=events).build()
+            self.add_view(paginator)
             self.persistent_added = True
             self.logger.info("Persistent view added.")

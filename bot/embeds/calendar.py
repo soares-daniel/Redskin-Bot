@@ -73,7 +73,7 @@ class CalendarEmbed(discord.Embed):
             events_for_day = await get_events_for_day(self.events, day)
             events = ""
             for event in events_for_day:
-                # Format event like this: ⚪ | 10:00 - 14:30 | Event name in code block
+                # Event Format: ⚪ | 10:00 - 14:30 | Event name in code block
                 symbol = await get_symbol_for_event_type(event.event_type)
                 events += f"{symbol} | {event.start_date.strftime('%H:%M')} - {event.end_date.strftime('%H:%M')} | {event.title}\n"
 

@@ -30,6 +30,8 @@ async def get_events(
         )
         db_event_list.append(event)
 
+    db_event_list.sort(key=lambda x: x.start_date)
+
     return db_event_list
 
 
