@@ -55,7 +55,7 @@ class CalendarPaginator(discord.ui.View):
     async def build(self) -> discord.ui.View:
         """Build paginator"""
         # Remove events which are not in the future
-        self.events = [event for event in self.events if event.end_date >= discord.utils.utcnow()]
+        self.events = [event for event in self.events if event.start_date >= discord.utils.utcnow()]
 
         # Get months and separate events in months
         # dict = {page: [events]}
