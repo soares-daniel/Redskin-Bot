@@ -16,6 +16,7 @@ class UserInUpdate(BaseSchemaModel):
 class UserInLogin(BaseSchemaModel):
     username: str
     password: str
+    grant_type: str = "password"
 
 
 class UserInResponse(BaseSchemaModel):

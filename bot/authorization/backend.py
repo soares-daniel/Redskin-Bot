@@ -15,7 +15,7 @@ class LoginFailedError(Exception):
 async def login(get_http_client, set_auth_user, logger) -> None:
     """Login to API"""
     logger.info("Attempting to login to API...")
-    http_client = get_http_client()()
+    http_client = get_http_client()
     login_user = UserInLogin(username=USERNAME, password=PASSWORD)
 
     for attempt in range(3):

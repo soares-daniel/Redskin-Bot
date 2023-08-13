@@ -72,7 +72,7 @@ class PRDBot(commands.Bot):
         await self.init_channels()
         self.logger.info("------")
         try:
-            await login(self.get_http_client, self.set_auth_user, self.logger)
+            await login(lambda: self.http_client, self.set_auth_user, self.logger)
         except LoginFailedError:
             self.logger.error("Login failed! Shutting down...")
             await self.http_client.close()
@@ -93,10 +93,6 @@ class PRDBot(commands.Bot):
     def set_auth_user(self, auth_user) -> None:
         """Set the authorized user"""
         self.auth_user = auth_user
-
-    def get_http_client(self):
-        """Get the http client"""
-        return lambda: self.http_client
 
     async def init_channels(self):
         """Initialize the channels if they don't exist"""
