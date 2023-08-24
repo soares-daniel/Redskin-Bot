@@ -192,11 +192,12 @@ class PRDBot(commands.Bot):
             if channel:
                 await channel.send(embed=log)
 
+            self.logger.debug(f"Operation Type: {operation_type}\nReceived event: {response}")
+
             # Update calendar if event
             if operation_type == "event":
                 await self.create_calendar()
 
-            self.logger.debug(f"Received event: {response}")
             return web.Response(text="OK")
         else:
             self.logger.error(f"Unsupported operation type: {operation_type}")
