@@ -1,5 +1,5 @@
 .env
-.env.docker
+.env
 logs
 
 *__pycache__/
